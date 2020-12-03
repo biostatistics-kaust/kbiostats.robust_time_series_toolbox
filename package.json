@@ -44,8 +44,15 @@
     ],
     "extraResources": [
       {
-        "from": "../model/",
-        "to": "./model/",
+        "from": "./stats-model/",
+        "to": "./stats-model/",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "./data-samples/",
+        "to": "./data-samples/",
         "filter": [
           "**/*"
         ]
@@ -53,8 +60,15 @@
     ],
     "extraFiles": [
       {
-        "from": "../model/",
-        "to": "./model/",
+        "from": "./stats-model/",
+        "to": "./stats-model/",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "./data-samples/",
+        "to": "./data-samples/",
         "filter": [
           "**/*"
         ]
