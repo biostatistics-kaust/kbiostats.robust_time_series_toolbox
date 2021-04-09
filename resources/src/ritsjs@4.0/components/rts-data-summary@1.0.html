@@ -70,7 +70,7 @@
       </li>
       -->
       <!---->
-      <li class="menu-title">Change in adjacent correlation estimate</li>
+      <li class="menu-title">Change in {correlation_change_label} estimate</li>
       <li class="info-before-TET">
         {mean_estimate['autocorrelation'](opts.model, 0)}
       </li>
@@ -238,7 +238,15 @@
     self.change_point = (model) => moment(model.dates[model.estimations.change_point_index]).format(
       "MMM DD, YYYY");
     console.log(config)
-    window.__config=config
+    //window.__config=config
+    const covariance_structure_type = config.model == null? "autocorrelation": config.model.covariance_structure_type;
+    self.correlation_change_label = (
+      covariance_structure_type == "autocorrelation"? "adjacent correlation": (
+        covariance_structure_type == "independent"? "variance": (
+          covariance_structure_type == "exchangeable"? "correlation": "<<UNKNOWN TYPE>>"
+        )
+      )
+    );
 
     //const rnd = (f) => Math.round(f * 1000) / 1000;
     const rnd = (f) => f.fmt("7.4g")
@@ -314,7 +322,7 @@
             <div>Estimate of level change</div>
           </div>
           <div class="cell-3">
-            <div>Estimated change in adjacent correlation</div>
+            <div>Estimated change in {correlation_change_label}</div>
           </div>
         </div>
       </li>
@@ -479,7 +487,14 @@
     const self = this;
     const config = opts;
     config.models = !!config.models ? config.models : [];
-
+    
+    const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autocorrelation": config.models[0].covariance_structure_type;
+    self.correlation_change_label = covariance_structure_type == "autocorrelation"? "adjacent correlation": (
+      covariance_structure_type == "independent"? "variance": (
+        covariance_structure_type == "exchangeable"? "correlation": "<<UNKNOWN TYPE>>"
+      )
+    );
+    
     self.changepoint_is_significant = (model) => model.estimations.existence_change_point_hypothesis.p_value < 0.05
     self.changepoint_significance_stars = (model) => (
       model.estimations.existence_change_point_hypothesis.p_value >= 0.1 ? "" : (

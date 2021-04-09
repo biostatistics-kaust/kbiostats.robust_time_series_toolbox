@@ -1,6 +1,6 @@
 #!/bin/bash
 
-riot=node_modules/.bin/riot
+riot=../../node_modules/.bin/riot
 function compile_riot(){
   file=$1
   cp $file ${file%.*}.tag

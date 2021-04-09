@@ -1,4 +1,4 @@
-riot.tag2('rts-model-wald-test-decision', '<h4>Supremum Wald test conclusion</h4> <table border="1" cellpadding="0" cellspacing="0" width="100%"> <tr> <td>Unit</td> <td>Formal intervention</td> <td>Estimated change point</td> <td>Intervention lag</td> <td>Supremum Wald-test decision</td> </tr> <tr> <td colspan="4">Intervention in all units</td> <td>{joint_supremum_wald_decision}<br> (SWT score: {joint_supremum_wald_score.fmt(⁗7.4g⁗)}, p-val: {joint_supremum_wald_p_value < 1e-20? ⁗< 1e-020⁗: joint_supremum_wald_p_value.fmt(⁗7.4g⁗)}) </td> </tr> <tr each="{model, index in opts.models}"> <td>{model.unit_name}</td> <td>{theoretical_change_point(model)}</td> <td>{estimated_change_point(model)}</td> <td>{diff_change_point(model)}</td> <td>{supremum_wald_decision(model)} <br> (SWT score: {supremum_wald_score(model).fmt(⁗7.4g⁗)}, p-val: {supremum_wald_p_value(model) < 1e-20? ⁗< 1e-020⁗: supremum_wald_p_value(model).fmt(⁗7.4g⁗)}) </td> </tr> </table>', '', '', function(opts) {
+riot.tag2('rts-model-wald-test-decision', '<h4>Supremum Wald test conclusion</h4> <table border="1" cellpadding="0" cellspacing="0" width="100%"> <tr> <td>Unit</td> <td>Formal intervention</td> <td>Estimated change point</td> <td>Intervention lag</td> <td>Supremum Wald-test decision</td> </tr> <tr> <td colspan="4">Intervention in all units</td> <td>{joint_supremum_wald_decision}<br> (SWT score: {joint_supremum_wald_score.fmt(⁗7.4g⁗)}, p-val: {joint_supremum_wald_p_value < 1e-20? ⁗< 1e-020⁗: joint_supremum_wald_p_value.fmt(⁗7.4g⁗)}) </td> </tr> <tr each="{model, index in opts.models}"> <td>{model.unit_name}</td> <td>{theoretical_change_point(model)}</td> <td>{estimated_change_point(model)}</td> <td>{diff_change_point(model)}</td> <td>{supremum_wald_decision(model)} <br> (cricit: {supremum_wald_score(model).fmt(⁗7.4g⁗)}, p-val: {supremum_wald_p_value(model) < 1e-20? ⁗< 1e-020⁗: supremum_wald_p_value(model).fmt(⁗7.4g⁗)}) </td> </tr> <tr> <td colspan="5"><span> * This p-value is not for interpretation, but instead used alongside the critical value cut-off in the Benjamini-Hochberg procedure. </span></td> </tr> </table>', '', '', function(opts) {
 
 
         const self = this;
@@ -99,10 +99,13 @@ riot.tag2('rts-model-parameter-changes-table', '<h4>Unit-specific changes in lev
 
 });
 
-riot.tag2('rts-model-stochastic-parameter-changes-table', '<h4>Estimates of the stochastic component parameters</h4> <table border="1" cellpadding="0" cellspacing="0" class="double-header" width="100%"> <tr> <td rowspan="2">Unit</td> <td colspan="2">Pre-change point</td> <td colspan="2">Post-change point</td> </tr> <tr> <td>Adjacent correlation</td> <td>Standard deviation</td> <td>Adjacent correlation</td> <td>Standard deviation</td> </tr> <tr each="{model, index in opts.models}"> <td>{model.unit_name}</td> <td>{estimate_1(model).fmt(⁗7.4g⁗)}</td> <td>{std_1(model).fmt(⁗7.4g⁗)}</td> <td>{estimate_2(model).fmt(⁗7.4g⁗)}</td> <td>{std_2(model).fmt(⁗7.4g⁗)}</td> </tr> </table>', '', '', function(opts) {
+riot.tag2('rts-model-stochastic-parameter-changes-table', '<h4>Estimates of the stochastic component parameters</h4> <table border="1" cellpadding="0" cellspacing="0" class="double-header" width="100%"> <tr> <td rowspan="2">Unit</td> <td colspan="2">Pre-change point</td> <td colspan="2">Post-change point</td> </tr> <tr> <td>{correlation_change_label}</td> <td>Standard deviation</td> <td>{correlation_change_label}</td> <td>Standard deviation</td> </tr> <tr each="{model, index in opts.models}"> <td>{model.unit_name}</td> <td>{estimate_1(model).fmt(⁗7.4g⁗)}</td> <td>{std_1(model).fmt(⁗7.4g⁗)}</td> <td>{estimate_2(model).fmt(⁗7.4g⁗)}</td> <td>{std_2(model).fmt(⁗7.4g⁗)}</td> </tr> </table>', '', '', function(opts) {
 
 
         const self = this;
+        const config = opts;
+        config.models = !!config.models ? config.models : [];
+
         const estimation_type_1 = "intercept";
         const estimation_type_2 = "slope";
 
@@ -115,6 +118,18 @@ riot.tag2('rts-model-stochastic-parameter-changes-table', '<h4>Estimates of the 
         self.std_1 = (model) => (model.estimations.initial.autocorrelation.standard_deviation);
 
         self.std_2 = (model) => (model.estimations.increment_change.autocorrelation.standard_deviation);
+
+        self.correlation_change_label = "..."
+
+        self.on("update", () => {
+          const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autocorrelation": config.models[0].covariance_structure_type;
+          console.warn("!!covariance_structure_type", covariance_structure_type)
+          self.correlation_change_label = covariance_structure_type == "autocorrelation"? "Adjacent correlation": (
+            covariance_structure_type == "independent"? "Variance": (
+              covariance_structure_type == "exchangeable"? "Correlation": "<<UNKNOWN TYPE>>"
+            )
+          );
+        });
 });
     
 riot.tag2('rts-model-report', '<div> <h3>Plots: {opts.model.unit_name}</h3> <rts-model-plot type="plain" class="plain" model="{opts.model}" if="{opts.plain_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="estimation" class="estimation" model="{opts.model}" if="{opts.estimation_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="loglikelihood" class="loglikelihood" model="{opts.model}" if="{opts.loglikelihood_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="box-plot-residuals" class="box-plot-residuals" model="{opts.model}" if="{opts.residuals_boxplot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="before-change-point-residuals" class="before-change-point-residuals" model="{opts.model}" if="{opts.residuals_before_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="after-change-point-residuals" class="after-change-point-residuals" model="{opts.model}" if="{opts.residuals_after_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="before-change-point-autocorrelation" class="before-change-point-autocorrelation" model="{opts.model}" if="{opts.acf_before_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> <rts-model-plot type="after-change-point-autocorrelation" class="after-change-point-autocorrelation" model="{opts.model}" if="{opts.acf_after_plot}" toolbar="{false}" static_version="{true}"></rts-model-plot> </div>', '', '', function(opts) {

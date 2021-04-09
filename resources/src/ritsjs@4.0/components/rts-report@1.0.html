@@ -24,7 +24,7 @@
             </td>
         </tr>
         <tr>
-            <td><span>
+            <td colspan="5"><span>
                 * This p-value is not for interpretation, but instead used alongside the critical value cut-off in the Benjamini-Hochberg procedure.
             </span></td>
         </tr>
@@ -280,9 +280,9 @@
         <td colspan="2">Post-change point</td>
         </tr>
         <tr>
-        <td>Adjacent correlation</td>
+        <td>{correlation_change_label}</td>
         <td>Standard deviation</td>
-        <td>Adjacent correlation</td>
+        <td>{correlation_change_label}</td>
         <td>Standard deviation</td>
         </tr>
         <tr each={model, index in opts.models}>
@@ -303,6 +303,9 @@
         //! <<UIComponent>> RTSModelStochasticParameterChangesTable
         //! RTSModelStochasticParameterChangesTable <-- formatterJS
         const self = this;
+        const config = opts;
+        config.models = !!config.models ? config.models : [];
+    
         const estimation_type_1 = "intercept";
         const estimation_type_2 = "slope";
 
@@ -320,6 +323,19 @@
 
         //! RTSModelStochasticParameterChangesTable: +std_2(model)
         self.std_2 = (model) => (model.estimations.increment_change.autocorrelation.standard_deviation);
+        
+        //! RTSModelStochasticParameterChangesTable: +correlation_change_label
+        self.correlation_change_label = "..."
+        
+        self.on("update", () => {
+          const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autocorrelation": config.models[0].covariance_structure_type;
+          console.warn("!!covariance_structure_type", covariance_structure_type)
+          self.correlation_change_label = covariance_structure_type == "autocorrelation"? "Adjacent correlation": (
+            covariance_structure_type == "independent"? "Variance": (
+              covariance_structure_type == "exchangeable"? "Correlation": "<<UNKNOWN TYPE>>"
+            )
+          );
+        });
     </script>
 </rts-model-stochastic-parameter-changes-table>
     

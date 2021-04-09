@@ -189,7 +189,7 @@ type OLSModel* = ref object
   degrees_of_freedom*: float
   variance_matrix_coefficients*: matrix
   #
-  include_intercept: bool #Because it could be informative. Maybe.
+  include_intercept*: bool #Because it could be informative. Maybe.
   #
   loglikelihood*: float
   #

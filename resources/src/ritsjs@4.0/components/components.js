@@ -1,3 +1,4 @@
+require('./rts-configuration-covariance-structure@1.0.js');
 require('./rts-configuration-date-panel@1.0.js');
 require('./rts-configuration-panel@1.0.js');
 require('./rts-data-summary@1.0.js');

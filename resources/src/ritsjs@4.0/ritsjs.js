@@ -19,21 +19,25 @@ exports.existence_change_point_hypothesis = existence_change_point_hypothesis
 console.log(":: LOADING RITS Models")
 
 //! RTSModel: +fit_model(dates, values, theoretical_change_point, candidates_before, candidates_after)
-const fit_model = (dates, values, theoretical_change_point, candidates_before, candidates_after) => {
+const fit_model = (dates, values, theoretical_change_point, candidates_before, candidates_after, covariance_structure_type) => {
   let model = {};
-  model.dates = dates
-  model.x = [...Array(model.dates.length).keys()]
-  model.change_point = {}
+  model.dates = dates;
+  model.x = [...Array(model.dates.length).keys()];
+  model.change_point = {};
   //Just for backcompatibility
-  model.change_point.theoretical = theoretical_change_point
-  model.change_point.before = candidates_before
-  model.change_point.after = candidates_after
+  model.change_point.theoretical = theoretical_change_point;
+  model.change_point.before = candidates_before;
+  model.change_point.after = candidates_after;
   //End backcompatibility
-  model.change_point.min = theoretical_change_point - candidates_before
-  model.change_point.max = theoretical_change_point + candidates_after
-  model.y = values
-  model.estimations = robust_interrupted_time_series(model.x, model.y,
-    model.change_point.min, model.change_point.max);
+  model.change_point.min = theoretical_change_point - candidates_before;
+  model.change_point.max = theoretical_change_point + candidates_after;
+  model.y = values;
+  model.estimations = robust_interrupted_time_series(
+    model.x, model.y,
+    model.change_point.min, model.change_point.max,
+    covariance_structure_type,
+    );
+  model.covariance_structure_type = covariance_structure_type;
   return model;
 };
 exports.fit_model = fit_model;

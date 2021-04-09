@@ -149,6 +149,7 @@ riot.tag2('rts-main-window', '<window-decorator ref="window"> <yield to="title">
         theoretical_change_point: modeling_info.change_point.index.theoretical - modeling_info.data_range.index.start,
         candidates_before: modeling_info.change_point.index.candidates_before,
         candidates_after: modeling_info.change_point.index.candidates_after,
+        covariance_structure_type: modeling_info.covariance_structure_type,
       }
       const data_source = modeling_info.data_source;
       const number_units = data_source.units;
@@ -158,7 +159,9 @@ riot.tag2('rts-main-window', '<window-decorator ref="window"> <yield to="title">
           data_source.valuesOfUnit(unit_name),
           model_parameters.theoretical_change_point,
           model_parameters.candidates_before,
-          model_parameters.candidates_after);
+          model_parameters.candidates_after,
+          model_parameters.covariance_structure_type,
+          );
         infomodel.unit_name = unit_name;
         infomodels.push(infomodel)
         self.trigger("app:processing:models", {

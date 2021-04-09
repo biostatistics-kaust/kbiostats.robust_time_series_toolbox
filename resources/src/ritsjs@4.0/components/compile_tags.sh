@@ -1,9 +1,11 @@
 #!/bin/bash
 
+RIOTC="node ../../../../node_modules/riot-cli/lib/index.js"
+
 function compile_riot(){
   file=$1
   cp $file ${file%.*}.tag
-  riot ${file%.*}.tag ${file%.*}.js
+  $RIOTC ${file%.*}.tag ${file%.*}.js
   rm ${file%.*}.tag
 }
 

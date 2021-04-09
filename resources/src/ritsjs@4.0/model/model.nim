@@ -1,7 +1,7 @@
 import math
 import sequtils
 import nimstats/nimstats
-import nimstats/rits
+import nimstats/rits_cov_struct
 ###########################################################
 ##! class RobustInterruptedCandidateModel
 ##! <<Model>> RobustInterruptedCandidateModel
@@ -197,14 +197,15 @@ when false:
     chisquare(dof=2.0*test_scores.len.toFloat).htest_score(total_score, test_type=oneTailed).flatten
 
 ##! RITSModel: +existence_change_point_hypothesis(x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int)
-proc robust_interrupted_time_series(x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int): RobustInterruptedModel  {.exportc: "robust_interrupted_time_series".} =
-  let model = rits_model(x, y, change_point_candidates_start, change_point_candidates_end)
+proc robust_interrupted_time_series(x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int, covariance_structure_type: cstring): RobustInterruptedModel  {.exportc: "robust_interrupted_time_series".} =
+  echo "covariance_structure_type:::", covariance_structure_type
+  let model = rits_model(x, y, change_point_candidates_start, change_point_candidates_end, $covariance_structure_type)
   echo model
   model.flatten
   
 ##! RITSModel: +robust_interrupted_time_series_approximated(sampling: int, x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int)
-proc robust_interrupted_time_series_approximated(sampling: int, x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int): RobustInterruptedModel  {.exportc: "robust_interrupted_time_series_approximated".} =
-  let model = rits_model(x.subsample(sampling), y, (change_point_candidates_start.toFloat/sampling.toFloat).toInt, (change_point_candidates_end.toFloat/sampling.toFloat).toInt)
+proc robust_interrupted_time_series_approximated(sampling: int, x: vector, y: vector, change_point_candidates_start: int, change_point_candidates_end: int, covariance_structure_type: cstring): RobustInterruptedModel  {.exportc: "robust_interrupted_time_series_approximated".} =
+  let model = rits_model(x.subsample(sampling), y, (change_point_candidates_start.toFloat/sampling.toFloat).toInt, (change_point_candidates_end.toFloat/sampling.toFloat).toInt, $covariance_structure_type)
   echo model
   model.flatten
   

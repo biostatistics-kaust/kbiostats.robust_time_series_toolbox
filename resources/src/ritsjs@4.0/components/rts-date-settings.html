@@ -44,11 +44,42 @@
         </p>
       </div>
     </div>
+    <!-- -->
+    <div class="par-container">
+      <h4 class="text-light">Type of covariance structure</h4>
+      <div class="covariance-structure-container" ref="covariance_structure_type">
+        <input name="cov_structure_type" type="radio" checked
+          data-role="radio"
+          data-style="2"
+          data-caption="Autoregressive structure AR(1)"
+          value="autoregressive"
+          data-cls-caption="fg-cyan "
+          data-cls-check="bd-cyan">
+        <input name="cov_structure_type" type="radio"
+          data-role="radio"
+          data-style="2"
+          data-caption="Independent correlation structure"
+          value="independent"
+          data-cls-caption="fg-cyan "
+          data-cls-check="bd-cyan">
+        <input name="cov_structure_type" type="radio"
+          data-role="radio"
+          data-style="2"
+          data-caption="Exchangeable correlation structure"
+          value="exchangeable"
+          data-cls-caption="fg-cyan "
+          data-cls-check="bd-cyan">
+      </div>
+    </div>
+    <!-- -->
     <div class="par-container">
       <button class="button start-model" ref="start_model">
         <i class="ms-Icon ms-Icon--TestAutoSolid icon"></i>
         <span class="caption">Model the dataset</span>
       </button>
+    </div>
+    <!-- -->
+    <div class="par-container">
     </div>
   </div>
   <style>
@@ -124,13 +155,21 @@
       background: rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(0, 0, 0, 0.2);
       transition: linear 200ms background-color;
-      margin-bottom: 50px;
-      position: absolute;
-      right: 0px;
+      margin-bottom: 20px;
+      /*position: absolute;
+      right: 0px;*/
+      float: right;
       cursor: default;
 
       background-color: rgb(19, 90, 138);
       color: white;
+    }
+    
+    .covariance-structure-container{
+      margin-bottom: 30px;
+    }
+    .covariance-structure-container *{
+      cursor: default!important;
     }
   </style>
   <script>
@@ -193,13 +232,23 @@
       return [datatable.length - 1, datatable[datatable.length - 1][0]];
     };
 
+    //! RTSDateSettings: +get_covariance_structure_type
+    self.get_covariance_structure_type = () => {
+      const element = self.refs.covariance_structure_type;
+      const cov_type = Array.from(element.querySelectorAll("input[type='radio']")).map(v => [v.value, v.checked]).filter(v=>v[1])[0][0];
+      return cov_type;
+    };
+    
     //! RTSDateSettings: +selected_datasource
     self.selected_datasource = () => {
       return {
         change_point: self.change_point,
         data_range: self.data_range,
-        data_source: (new RTSModel.ModelDataSourceJson()).fill_from_data_table(config.data_source.units, self
-          .datatable.filter((val, idx) => idx >= self.data_range.index.start && idx <= self.data_range.index.end))
+        data_source: (new RTSModel.ModelDataSourceJson()).fill_from_data_table(
+          config.data_source.units,
+          self.datatable.filter((val, idx) => idx >= self.data_range.index.start && idx <= self.data_range.index.end)
+        ),
+        covariance_structure_type: self.get_covariance_structure_type(),
       }
     };
 
@@ -412,9 +461,7 @@
       const graph_options_master = default_graph_options();
       graph_options_master.labels = labels;
       if (!!permanent_info.data_range.dates.start) {
-        graph_options_master.dateWindow = [permanent_info.data_range.dates.start, permanent_info.data_range.dates
-          .end
-        ];
+        graph_options_master.dateWindow = [permanent_info.data_range.dates.start, permanent_info.data_range.dates.end];
       }
 
       const line_annotation_plugin = new Crosshair(start_height = 125);
