@@ -120,8 +120,7 @@ app.on('ready', function () {
   });
   //mainWindow.maximize();
   //
-  //
-  mainWindow.toggleDevTools();
+  //mainWindow.toggleDevTools();
   //modalWindow.toggleDevTools();
 
   

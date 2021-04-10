@@ -167,25 +167,24 @@ riot.tag2('rts-report', '<div class="report-container"> <virtual if="{opts.model
                 } else {
                     jQuery(":hidden", node).remove();
                     const content = `<!DOCTYPE html><html><body>${node.outerHTML}</body></html>`
-                    dialog.showSaveDialog({
+                    const file_path = dialog.showSaveDialogSync({
                         title: "Save full report",
                         defaultPath: 'Report.docx',
                         filters: [{
                             name: 'Microsoft Word Document (.docx)',
                             extensions: ['docx']
                         }]
-                    }, function (file_path) {
-                        if (file_path) {
-                            const blob = htmlDocx.asBlob(content, {
-                                orientation: "portrait"
-                            });
-                            reader.onload = () => {
-                                fs.writeFile(file_path, new Buffer(reader.result), {},
-                                    () => {});
-                            }
-                            reader.readAsArrayBuffer(blob);
-                        }
                     });
+                    if (file_path) {
+                        const blob = htmlDocx.asBlob(content, {
+                            orientation: "portrait"
+                        });
+                        reader.onload = () => {
+                            fs.writeFile(file_path, new Buffer(reader.result), {},
+                                () => {});
+                        }
+                        reader.readAsArrayBuffer(blob);
+                    }
                 }
             };
             setTimeout(wait_until, 500);
