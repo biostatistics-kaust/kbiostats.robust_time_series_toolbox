@@ -9,9 +9,9 @@ riot.tag2('rts-data-block-summary', '<div class="model-title" style="" colspan="
       "MMM DD, YYYY");
     console.log(config)
 
-    const covariance_structure_type = config.model == null? "autocorrelation": config.model.covariance_structure_type;
+    const covariance_structure_type = config.model == null? "autoregressive": config.model.covariance_structure_type;
     self.correlation_change_label = (
-      covariance_structure_type == "autocorrelation"? "adjacent correlation": (
+      covariance_structure_type == "autoregressive"? "adjacent correlation": (
         covariance_structure_type == "independent"? "variance": (
           covariance_structure_type == "exchangeable"? "correlation": "<<UNKNOWN TYPE>>"
         )
@@ -76,8 +76,9 @@ riot.tag2('rts-data-table-summary', '<div class="par-container"> <h4 class="text
     const config = opts;
     config.models = !!config.models ? config.models : [];
 
-    const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autocorrelation": config.models[0].covariance_structure_type;
-    self.correlation_change_label = covariance_structure_type == "autocorrelation"? "adjacent correlation": (
+    const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autoregressive": config.models[0].covariance_structure_type;
+    console.warn("@covariance_structure_type:", covariance_structure_type)
+    self.correlation_change_label = covariance_structure_type == "autoregressive"? "adjacent correlation": (
       covariance_structure_type == "independent"? "variance": (
         covariance_structure_type == "exchangeable"? "correlation": "<<UNKNOWN TYPE>>"
       )

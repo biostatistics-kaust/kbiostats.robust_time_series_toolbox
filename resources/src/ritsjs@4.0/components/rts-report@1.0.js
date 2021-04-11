@@ -122,9 +122,9 @@ riot.tag2('rts-model-stochastic-parameter-changes-table', '<h4>Estimates of the 
         self.correlation_change_label = "..."
 
         self.on("update", () => {
-          const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autocorrelation": config.models[0].covariance_structure_type;
+          const covariance_structure_type = config.models.length == 0 || config.models[0] == null? "autoregressive": config.models[0].covariance_structure_type;
           console.warn("!!covariance_structure_type", covariance_structure_type)
-          self.correlation_change_label = covariance_structure_type == "autocorrelation"? "Adjacent correlation": (
+          self.correlation_change_label = covariance_structure_type == "autoregressive"? "Adjacent correlation": (
             covariance_structure_type == "independent"? "Variance": (
               covariance_structure_type == "exchangeable"? "Correlation": "<<UNKNOWN TYPE>>"
             )

@@ -80,8 +80,45 @@ proc `$`*(model: RITSModel): string =
   result &= ($model.model.existence_change_point_hypothesis).replace("\n", "\n  ")
 
 const USE_APROXIMATION = true
-##! RITSModel: ~covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): matrix 
-proc covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): matrix =
+
+proc covariance_matrix_for_before_model_independent(model: RITSCandidateModel, x: vector): matrix =
+  let
+    T = x.len
+    sigma = 1 / model.before_residual_model.noise_variance.estimate.sqrt
+    X = x[1..x.high].as_column_vector.data_transform((x, i) => @[
+      x[0] * sigma, 
+      1.0 * sigma, 
+      (if i > model.change_point_candidate: x[0] * sigma else: 0.0),
+      (if i > model.change_point_candidate: 1.0 * sigma else: 0.0)
+    ])
+  return (X.T * X).inverse
+  
+proc covariance_matrix_for_before_model_exchangeable(model: RITSCandidateModel, x: vector): matrix =
+  let
+    T = x.len
+    sigma = 1 / model.before_residual_model.noise_variance.estimate.sqrt
+    X = x[1..x.high].as_column_vector.data_transform((x, i) => @[
+      x[0] * sigma, 
+      1.0 * sigma, 
+      (if i > model.change_point_candidate: x[0] * sigma else: 0.0),
+      (if i > model.change_point_candidate: 1.0 * sigma else: 0.0)
+    ])
+    rho = min(model.before_residual_model.beta_hat[0].abs, 1 - 1e-5)
+    approx_inverse_matrix_A = (1 - rho)
+    approx_inverse_matrix_B = - 1 / approx_inverse_matrix_A
+  
+  var
+    inverted_matrix: matrix = @[]
+  for r in 0..(x.high - 1):
+    inverted_matrix.add @[]
+    for c in 0..(x.high - 1):
+      inverted_matrix[r].add approx_inverse_matrix_B
+      if r == c:
+        inverted_matrix[r][c] = approx_inverse_matrix_A
+  
+  return (X.T * inverted_matrix * X).inverse
+
+proc covariance_matrix_for_before_model_autoregressive(model: RITSCandidateModel, x: vector): matrix =
   let
     T = x.len
     #phi = model.before_residual_model.beta_hat[0]
@@ -95,7 +132,7 @@ proc covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): m
       (if i > model.change_point_candidate: x[0] else: 0.0),
       (if i > model.change_point_candidate: 1.0 else: 0.0)
     ])
-  #Numerical approximation
+  #Numerical approximation when |phi| < 0.5
   when USE_APROXIMATION:
     var
       covariance_approx: matrix = @[]
@@ -146,6 +183,21 @@ proc covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): m
     for c in 0..(x.high - 1):
       covariance[r][c] = covariance_factor * (phi ^ (abs((c - r) mod T).toFloat))
   result = (X.T * (covariance.inverse) * X).inverse
+
+##! RITSModel: ~covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): matrix 
+proc covariance_matrix_for_before_model(model: RITSCandidateModel, x: vector): matrix =
+  let
+    covariance_structure_type = model.covariance_structure_type
+  if covariance_structure_type == "autoregressive":
+    return model.covariance_matrix_for_before_model_autoregressive(x)
+  elif covariance_structure_type == "independent":
+    return model.covariance_matrix_for_before_model_independent(x)
+  elif covariance_structure_type == "exchangeable":
+    return model.covariance_matrix_for_before_model_exchangeable(x)
+  else:
+    echo "Covariance structure unrecognized: ", covariance_structure_type
+    return zeros(x.len, x.len)
+
 
 ##! RITSModel: ~model_candidate(x: vector, y: vector, change_point: int, covariance_structure_type: string): RITSCandidateModel
 proc model_candidate(x: vector, y: vector, change_point: int, covariance_structure_type: string): RITSCandidateModel = 

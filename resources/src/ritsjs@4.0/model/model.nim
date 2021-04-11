@@ -173,6 +173,13 @@ proc flatten(model: RITSModel): RobustInterruptedModel =
   result.increment_change.residuals.autocorrelation = acf2.estimators_mean.clean_nan(0.0)
   result.increment_change.residuals.autocorrelation_null_confidence_interval = acf2.null_distribution.confidence_interval
   #
+  if model.model.covariance_structure_type == "independent":
+    result.initial.autocorrelation = result.initial.noise
+    result.increment_change.autocorrelation = result.increment_change.noise
+  elif model.model.covariance_structure_type == "exchangeable":
+    result.initial.autocorrelation = result.initial.noise
+    result.increment_change.autocorrelation = result.increment_change.noise
+  #
   result.increment_change.level.mean = (
     result.increment_change.slope.mean * result.change_point_x + result.increment_change.intercept.mean
   )
